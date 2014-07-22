@@ -1,3 +1,5 @@
+# coding=utf-8
+from __future__ import unicode_literals
 import os
 from django.forms import widgets
 from django.utils.safestring import mark_safe
@@ -7,19 +9,27 @@ from django.conf import settings
 
 HTML = (
     '<div class="s3direct" data-url="{policy_url}">'
+    '  <div class="link-controls">'
     '    <a class="link" target="_blank" href="{file_url}">{file_name}</a>'
-    '    <a class="remove" href="#remove">Remove</a>'
+    '    <a class="remove" href="#remove">Очистить</a>'
+    '  </div>'
+    '  <div class="progress-controls">'
+    '    <div class="progress progress-striped">'
+    '        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">'
+    '        </div>'
+    '        <div class="info"></div>'
+    '    </div>'
+    '    <span class="abort btn btn-danger btn-sm">Отмена</span>'
+    '  </div>'
+    '  <div class="form-controls">'
     '    <input type="hidden" value="{file_url}" id="{element_id}" name="{name}" />'
     '    <input type="file" class="fileinput" />'
-    '    <div class="progress progress-striped active">'
-    '        <div class="bar"></div>'
-    '    </div>'
+    '  </div>'
     '</div>'
 )
 
 
 class S3DirectEditor(widgets.TextInput):
-
     class Media:
         js = (
             's3direct/js/jquery-1.10.2.min.js',
