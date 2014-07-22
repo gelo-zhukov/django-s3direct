@@ -4,17 +4,15 @@ from base64 import b64encode
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import user_passes_test
 from django.views.decorators.http import require_POST
 
 
-S3DIRECT_DIR = getattr(settings, "S3DIRECT_DIR", 's3direct')
 S3DIRECT_UNIQUE_RENAME = getattr(settings, "S3DIRECT_UNIQUE_RENAME", None)
+S3DIRECT_ROOT_DIR = getattr(settings, "S3DIRECT_ROOT_DIR", '')
 
 
 @csrf_exempt
 @require_POST
-@user_passes_test(lambda u: u.is_staff)
 def get_upload_params(request, upload_to=''):
     content_type = request.POST['type']
     source_filename = request.POST['name']
@@ -52,16 +50,19 @@ def create_upload_data(content_type, source_filename, upload_to):
     else:
         filename = '${filename}'
 
-    key = "%s/%s" % (upload_to or S3DIRECT_DIR, filename)
+    key = "%s/%s/%s" % (S3DIRECT_ROOT_DIR, upload_to, filename)
+    file_path = "%s/%s" % (upload_to, filename)
     bucket_url = "https://%s/%s" % (endpoint, bucket)
 
     return {
+        "form_action": bucket_url,
+        "file_path": file_path,
+
         "policy": policy,
         "signature": signature_b64,
         "key": key,
         "AWSAccessKeyId": access_key,
-        "form_action": bucket_url,
         "success_action_status": "201",
         "acl": "public-read",
-        "Content-Type": content_type
+        "Content-Type": content_type,
     }

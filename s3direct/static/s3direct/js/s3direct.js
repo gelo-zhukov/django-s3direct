@@ -47,8 +47,13 @@
                         },
                         success: function (fields) {
                             data.url = fields.form_action;
+                            $el.data('file-path', fields.file_path);
+
                             delete fields.form_action;
+                            delete fields.file_path;
+
                             data.formData = fields;
+
                             var jqXHR = data.submit();
                             $el.find('.abort').on('click', function () {
                                 jqXHR.abort();
@@ -74,7 +79,7 @@
                         var file_name = url.replace(/^.*[\\\/]/, '');
                         $el.find('.link').attr('href', url).text(file_name);
                         showControls($el, '.link-controls');
-                        $el.find('input[type=hidden]').val(data.formData.key);
+                        $el.find('input[type=hidden]').val($el.data('file-path'));
                         $el.find('.progress-bar').css({width: '0%'});
                         $el.find('.info').text('');
                         $s3Direct(".submit-row input[type=submit]").prop('disabled', false);
