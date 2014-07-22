@@ -11,6 +11,7 @@ if hasattr(settings, 'AWS_SECRET_ACCESS_KEY'):
         def __init__(self, *args, **kwargs):
             upload_to = kwargs.pop('upload_to', '')
             self.widget = S3DirectEditor(upload_to=upload_to)
+            kwargs['max_length'] = kwargs.get('max_length', 100)
             super(S3DirectField, self).__init__(*args, **kwargs)
 
         def get_internal_type(self):
@@ -21,7 +22,8 @@ if hasattr(settings, 'AWS_SECRET_ACCESS_KEY'):
             defaults.update(kwargs)
             return super(S3DirectField, self).formfield(**defaults)
 else:
-    S3DirectField = FileField
+    class S3DirectField(FileField):
+        pass
 
 
 if 'south' in settings.INSTALLED_APPS:
