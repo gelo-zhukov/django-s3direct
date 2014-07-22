@@ -74,7 +74,7 @@
                         var file_name = url.replace(/^.*[\\\/]/, '');
                         $el.find('.link').attr('href', url).text(file_name);
                         showControls($el, '.link-controls');
-                        $el.find('input[type=hidden]').val(url);
+                        $el.find('input[type=hidden]').val(data.formData.key);
                         $el.find('.progress-bar').css({width: '0%'});
                         $el.find('.info').text('');
                         $s3Direct(".submit-row input[type=submit]").prop('disabled', false);

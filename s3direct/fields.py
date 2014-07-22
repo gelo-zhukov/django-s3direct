@@ -1,14 +1,18 @@
+from django.core.files.storage import default_storage
 from django.db.models import Field, FileField
-from django.db.models.fields.files import FileDescriptor
+from django.db.models.fields.files import FileDescriptor, FieldFile
 from s3direct.widgets import S3DirectEditor
 from django.conf import settings
 
 
 if hasattr(settings, 'AWS_SECRET_ACCESS_KEY'):
     class S3DirectField(Field):
+
+        attr_class = FieldFile
         descriptor_class = FileDescriptor
 
-        def __init__(self, *args, **kwargs):
+        def __init__(self, storage=None, *args, **kwargs):
+            self.storage = storage or default_storage
             upload_to = kwargs.pop('upload_to', '')
             self.widget = S3DirectEditor(upload_to=upload_to)
             kwargs['max_length'] = kwargs.get('max_length', 100)
@@ -21,6 +25,10 @@ if hasattr(settings, 'AWS_SECRET_ACCESS_KEY'):
             defaults = {'widget': self.widget}
             defaults.update(kwargs)
             return super(S3DirectField, self).formfield(**defaults)
+
+        def contribute_to_class(self, cls, name, virtual_only=False):
+            super(S3DirectField, self).contribute_to_class(cls, name, virtual_only)
+            setattr(cls, self.name, self.descriptor_class(self))
 else:
     class S3DirectField(FileField):
         pass
