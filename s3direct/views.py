@@ -1,4 +1,9 @@
-import hashlib, uuid, hmac, json
+#coding=utf-8
+import hashlib
+import uuid
+import hmac
+import json
+import urllib
 from datetime import datetime, timedelta
 from base64 import b64encode
 from django.conf import settings
@@ -29,12 +34,15 @@ def create_upload_data(content_type, source_filename, upload_to):
     expires_in = datetime.now() + timedelta(hours=24)
     expires = expires_in.strftime('%Y-%m-%dT%H:%M:%S.000Z')
 
+    content_disposition = 'attachment; filename="%s"' % urllib.quote(source_filename.encode('utf-8'))
+
     policy_object = json.dumps({
         "expiration": expires,
         "conditions": [
             {"bucket": bucket},
             {"acl": "public-read"},
             {"Content-Type": content_type},
+            {"Content-Disposition": content_disposition},
             ["starts-with", "$key", ""],
             {"success_action_status": "201"}
         ]
@@ -65,4 +73,5 @@ def create_upload_data(content_type, source_filename, upload_to):
         "success_action_status": "201",
         "acl": "public-read",
         "Content-Type": content_type,
+        "Content-Disposition": content_disposition
     }

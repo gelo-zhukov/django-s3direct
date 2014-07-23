@@ -76,8 +76,7 @@
                 done: function (e, data) {
                     if (data.textStatus === 'success') {
                         var url = $s3Direct(data.result).find('Location').text().replace(/%2F/g, '/');
-                        var file_name = url.replace(/^.*[\\\/]/, '');
-                        $el.find('.link').attr('href', url).text(file_name);
+                        $el.find('.link').attr('href', url).text(data.originalFiles[0].name);
                         showControls($el, '.link-controls');
                         $el.find('input[type=hidden]').val($el.data('file-path'));
                         $el.find('.progress-bar').css({width: '0%'});
