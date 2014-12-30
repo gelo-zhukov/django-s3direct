@@ -19,7 +19,7 @@ S3DIRECT_ROOT_DIR = getattr(settings, "S3DIRECT_ROOT_DIR", '')
 @csrf_exempt
 @require_POST
 def get_upload_params(request, upload_to=''):
-    content_type = request.POST['type']
+    content_type = request.POST.get('type', 'application/octet-stream')
     source_filename = request.POST['name']
     data = create_upload_data(content_type, source_filename, upload_to)
     return HttpResponse(json.dumps(data), content_type="application/json")
