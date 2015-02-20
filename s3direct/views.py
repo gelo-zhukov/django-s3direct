@@ -49,7 +49,7 @@ def create_upload_data(content_type, source_filename, upload_to):
     })
 
     policy = b64encode(policy_object.replace('\n', '').replace('\r', ''))
-    signature = hmac.new(secret_access_key, policy, hashlib.sha1).digest()
+    signature = hmac.new(str(secret_access_key), policy, hashlib.sha1).digest()
     signature_b64 = b64encode(signature)
 
     if S3DIRECT_UNIQUE_RENAME:
