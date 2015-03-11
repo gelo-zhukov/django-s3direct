@@ -56,8 +56,8 @@ class S3DirectEditor(widgets.TextInput):
 
         policy_url = reverse('s3direct', kwargs=kwargs)
         file_url = value if value else ''
-        if hasattr(file_url, 'url'):
-            file_url = file_url.url
+        if hasattr(file_url, 'name'):
+            file_url = file_url.name
         file_name = os.path.basename(file_url)
 
         output = HTML.format(policy_url=policy_url,
