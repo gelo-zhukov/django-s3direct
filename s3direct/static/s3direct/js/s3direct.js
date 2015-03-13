@@ -115,9 +115,10 @@
         });
 
         $s3Direct(document).bind('DOMNodeInserted', function (e) {
-            var el = $s3Direct(e.target).find('.s3direct').not('.initialized').get(0);
-            var yes = $s3Direct(el).length !== 0 && $s3Direct(el);
-            if (yes) setup(el);
+            $s3Direct(e.target).find('.s3direct').not('.initialized').each(function() {
+                var yes = $s3Direct(this).length !== 0 && $s3Direct(this);
+                if (yes) setup(this);
+            });
         })
 
     });
