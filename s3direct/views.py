@@ -10,10 +10,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-
-
-S3DIRECT_UNIQUE_RENAME = getattr(settings, "S3DIRECT_UNIQUE_RENAME", None)
-S3DIRECT_ROOT_DIR = getattr(settings, "S3DIRECT_ROOT_DIR", '')
+from s3direct import defaults
 
 
 @csrf_exempt
@@ -52,13 +49,13 @@ def create_upload_data(content_type, source_filename, upload_to):
     signature = hmac.new(str(secret_access_key), policy, hashlib.sha1).digest()
     signature_b64 = b64encode(signature)
 
-    if S3DIRECT_UNIQUE_RENAME:
+    if defaults.S3DIRECT_UNIQUE_RENAME:
         ext = source_filename.split('.')[-1]
         filename = '%s.%s' % (uuid.uuid4(), ext)
     else:
         filename = '${filename}'
 
-    key = "%s/%s/%s" % (S3DIRECT_ROOT_DIR, upload_to, filename)
+    key = "%s/%s/%s" % (defaults.S3DIRECT_ROOT_DIR, upload_to, filename)
     file_path = "%s/%s" % (upload_to, filename)
     bucket_url = "https://%s/%s" % (endpoint, bucket)
 

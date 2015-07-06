@@ -1,7 +1,9 @@
+import uuid
 from django.core.files.storage import default_storage
 from django.db.models import FileField
 from django.db.models.fields import TextField
 from django.db.models.fields.files import FileDescriptor, FieldFile
+from s3direct import defaults
 from s3direct.widgets import S3DirectEditor
 from django.conf import settings
 
@@ -27,6 +29,14 @@ if hasattr(settings, 'AWS_SECRET_ACCESS_KEY'):
         def contribute_to_class(self, cls, name, virtual_only=False):
             super(S3DirectField, self).contribute_to_class(cls, name, virtual_only)
             setattr(cls, self.name, self.descriptor_class(self))
+
+        def generate_filename(self, instance, filename):
+            if defaults.S3DIRECT_UNIQUE_RENAME:
+                ext = filename.split('.')[-1]
+                filename = '%s.%s' % (uuid.uuid4(), ext)
+            else:
+                filename = '${filename}'
+            return "%s/%s/%s" % (defaults.S3DIRECT_ROOT_DIR, self.upload_to, filename)
 else:
     class S3DirectField(FileField):
         pass
