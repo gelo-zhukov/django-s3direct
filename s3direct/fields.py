@@ -16,8 +16,8 @@ if hasattr(settings, 'AWS_SECRET_ACCESS_KEY'):
 
         def __init__(self, storage=None, *args, **kwargs):
             self.storage = storage or default_storage
-            upload_to = kwargs.pop('upload_to', '')
-            self.widget = S3DirectEditor(upload_to=upload_to)
+            self.upload_to = kwargs.pop('upload_to', '')
+            self.widget = S3DirectEditor(upload_to=self.upload_to)
             kwargs['max_length'] = kwargs.get('max_length', 100)
             super(S3DirectField, self).__init__(*args, **kwargs)
 
