@@ -1,9 +1,17 @@
 import json
+import os
 
+from django.core.exceptions import PermissionDenied
+from django.core.files.storage import default_storage, FileSystemStorage
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.views.generic.edit import FormView
 
+from .forms import LocalUploadForm
 from .utils import create_upload_data, get_s3direct_destinations
 
 
@@ -52,9 +60,17 @@ def get_upload_params(request):
         # https://aws.amazon.com/articles/1434#aws-table
         key = '%s/${filename}' % key
 
+    if hasattr(content_disposition, '__call__'):
+        content_disposition = content_disposition(filename)
+
     access_key = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
     secret_access_key = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
     token = None
+
+    # replace None with '' to skip checking
+    if isinstance(default_storage, FileSystemStorage):
+        access_key = access_key or ''
+        secret_access_key = secret_access_key or ''
 
     if access_key is None or secret_access_key is None:
         # Get credentials from instance profile if not defined in settings --
@@ -82,5 +98,27 @@ def get_upload_params(request):
         content_type, key, acl, bucket, cache_control, content_disposition,
         content_length_range, server_side_encryption, access_key, secret_access_key, token
     )
+    # path for FileField
+    # TODO check for unicode filename
+    data['file_path'] = os.path.relpath(key.replace('${filename}', filename),
+                                        default_storage.location)
+    if isinstance(default_storage, FileSystemStorage):
+        data['form_action'] = reverse('s3direct_local_upload')
 
     return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+class LocalUploadView(FormView):
+    http_method_names = ['post']
+    form_class = LocalUploadForm
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        if not isinstance(default_storage, FileSystemStorage):
+            raise PermissionDenied()
+        return super(LocalUploadView, self).dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        default_storage.save(form.cleaned_data['key'],
+                             form.cleaned_data['file'])
+        return HttpResponse(status=201)
