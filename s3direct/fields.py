@@ -40,8 +40,3 @@ if hasattr(settings, 'AWS_SECRET_ACCESS_KEY'):
 else:
     class S3DirectField(FileField):
         pass
-
-
-if 'south' in settings.INSTALLED_APPS:
-    from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^s3direct\.fields\.S3DirectField"])
