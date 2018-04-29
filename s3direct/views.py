@@ -30,11 +30,18 @@ def get_upload_params(request):
     auth = dest.get('auth')
     allowed = dest.get('allowed')
     acl = dest.get('acl')
-    bucket = dest.get('bucket')
+    bucket = dest.get('bucket', settings.AWS_STORAGE_BUCKET_NAME)
     cache_control = dest.get('cache_control')
     content_disposition = dest.get('content_disposition')
     content_length_range = dest.get('content_length_range')
     server_side_encryption = dest.get('server_side_encryption')
+    access_key = dest.get(
+        'access_key', getattr(settings, 'AWS_ACCESS_KEY_ID', None))
+    secret_access_key = dest.get(
+        'secret_access_key', getattr(settings, 'AWS_SECRET_ACCESS_KEY', None))
+    storage = dest.get('storage', default_storage)
+    region = dest.get('region', getattr(settings, 'S3DIRECT_REGION', None))
+    endpoint = dest.get('endpoint')
 
     if not acl:
         acl = 'public-read'
@@ -63,12 +70,10 @@ def get_upload_params(request):
     if hasattr(content_disposition, '__call__'):
         content_disposition = content_disposition(filename)
 
-    access_key = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
-    secret_access_key = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
     token = None
 
     # replace None with '' to skip checking
-    if isinstance(default_storage, FileSystemStorage):
+    if isinstance(storage, FileSystemStorage):
         access_key = access_key or ''
         secret_access_key = secret_access_key or ''
 
@@ -96,13 +101,14 @@ def get_upload_params(request):
 
     data = create_upload_data(
         content_type, key, acl, bucket, cache_control, content_disposition,
-        content_length_range, server_side_encryption, access_key, secret_access_key, token
+        content_length_range, server_side_encryption, access_key,
+        secret_access_key, token, region, endpoint
     )
     # path for FileField
     # TODO check for unicode filename
     data['file_path'] = os.path.relpath(key.replace('${filename}', filename),
-                                        default_storage.location)
-    if isinstance(default_storage, FileSystemStorage):
+                                        storage.location)
+    if isinstance(storage, FileSystemStorage):
         data['form_action'] = reverse('s3direct_local_upload')
 
     return HttpResponse(json.dumps(data), content_type="application/json")
