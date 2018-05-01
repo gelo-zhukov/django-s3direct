@@ -1,8 +1,9 @@
 import hashlib
 import hmac
 import json
-from datetime import datetime, timedelta
 from base64 import b64encode
+from collections import OrderedDict
+from datetime import datetime, timedelta
 
 from django.conf import settings
 
@@ -63,22 +64,21 @@ def create_upload_data(content_type, key, acl, bucket=None, cache_control=None,
     now_date = datetime.utcnow().strftime('%Y%m%dT%H%M%S000Z')
     raw_date = datetime.utcnow().strftime('%Y%m%d')
 
-    policy_dict = {
-            "expiration": expires,
-            "conditions": [
-                {"bucket": bucket},
-                {"acl": acl},
-                ["starts-with", "$key", ''],
-                {"success_action_status": '201'},
-                {"x-amz-credential": '%s/%s/%s/s3/aws4_request' % (
-                    access_key,
-                    raw_date, region
-                )},
-                {"x-amz-algorithm": "AWS4-HMAC-SHA256"},
-                {"x-amz-date": now_date},
-                {"content-type": content_type},
-            ]
-        }
+    policy_dict = OrderedDict()
+    policy_dict['expiration'] = expires
+    policy_dict['conditions'] = [
+        {"bucket": bucket},
+        {"acl": acl},
+        ["starts-with", "$key", ''],
+        {"success_action_status": '201'},
+        {"x-amz-credential": '%s/%s/%s/s3/aws4_request' % (
+            access_key,
+            raw_date, region
+        )},
+        {"x-amz-algorithm": "AWS4-HMAC-SHA256"},
+        {"x-amz-date": now_date},
+        {"content-type": content_type},
+    ]
 
     if token:
         policy_dict["conditions"].append({"x-amz-security-token": token})
