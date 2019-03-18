@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'cat',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -146,7 +146,7 @@ S3DIRECT_DESTINATIONS = {
     # Allow authenticated users to upload mp4's
     'videos': {
         'key': 'uploads/videos',
-        'auth': lambda u: u.is_authenticated(),
+        'auth': lambda u: u.is_authenticated,
         'allowed': ['video/mp4']
     },
 

@@ -1,5 +1,4 @@
 from django.db.models import Field
-from django.conf import settings
 from s3direct.widgets import S3DirectWidget
 
 
@@ -15,8 +14,3 @@ class S3DirectField(Field):
     def formfield(self, *args, **kwargs):
         kwargs['widget'] = self.widget
         return super(S3DirectField, self).formfield(*args, **kwargs)
-
-
-if 'south' in settings.INSTALLED_APPS:
-    from south.modelsinspector import add_introspection_rules
-    add_introspection_rules([], ["^s3direct\.fields\.S3DirectField"])

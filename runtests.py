@@ -2,7 +2,6 @@
 
 from os import environ
 import sys
-from distutils.version import StrictVersion
 import django
 from django.conf import settings
 
@@ -21,10 +20,10 @@ settings.configure(
         'django.contrib.admin',
         's3direct',
     ),
-    MIDDLEWARE_CLASSES=(
+    MIDDLEWARE=[
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
-    ),
+    ],
     TEMPLATES=[
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -57,7 +56,7 @@ settings.configure(
         },
         'vids': {
             'key': 'uploads/vids',
-            'auth': lambda u: u.is_authenticated(),
+            'auth': lambda u: u.is_authenticated,
             'allowed': ['video/mp4'],
         },
         'cached': {
@@ -76,12 +75,8 @@ settings.configure(
 if hasattr(django, 'setup'):
     django.setup()
 
-if django.get_version() < StrictVersion('1.6'):
-    from django.test.simple import DjangoTestSuiteRunner
-    test_runner = DjangoTestSuiteRunner(verbosity=1)
-else:
-    from django.test.runner import DiscoverRunner
-    test_runner = DiscoverRunner(verbosity=1)
+from django.test.runner import DiscoverRunner
+test_runner = DiscoverRunner(verbosity=1)
 
 failures = test_runner.run_tests(['s3direct', ])
 

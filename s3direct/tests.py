@@ -3,7 +3,7 @@ from base64 import b64decode
 
 from django.test.utils import override_settings
 from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse, resolve
+from django.urls import reverse, resolve
 from django.test import TestCase
 
 from s3direct import widgets
@@ -25,7 +25,7 @@ HTML_OUTPUT = (
 
 FOO_RESPONSE = {
     u'x-amz-algorithm': u'AWS4-HMAC-SHA256',
-    u'form_action': u'https://s3.amazonaws.com/test-bucket',
+    u'form_action': u'/local_upload/',
     u'success_action_status': 201,
     u'acl': u'public-read',
     u'key': u'uploads/imgs/${filename}',
@@ -139,8 +139,8 @@ class WidgetTestCase(TestCase):
     'misc': (lambda original_filename: 'images/unique.jpg',),
     'files': ('uploads/files', lambda u: u.is_staff,),
     'imgs': ('uploads/imgs', lambda u: True, ['image/jpeg', 'image/png'],),
-    'vids': ('uploads/vids', lambda u: u.is_authenticated(), ['video/mp4'],),
-    'cached': ('uploads/vids', lambda u: u.is_authenticated(), '*',
+    'vids': ('uploads/vids', lambda u: u.is_authenticated, ['video/mp4'],),
+    'cached': ('uploads/vids', lambda u: u.is_authenticated, '*',
                'authenticated-read', 'astoragebucketname', 'max-age=2592000',
                'attachment', 'AES256'),
 })

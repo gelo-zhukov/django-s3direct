@@ -3,7 +3,7 @@ import os
 
 from django.core.exceptions import PermissionDenied
 from django.core.files.storage import default_storage, FileSystemStorage
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
